@@ -78,8 +78,12 @@
     "docs/compatibility.md",
     "docs/release-verification.md",
     "docs/logo.png",
+    "docs/readme-banner.png",
     "docs/readme_es.md",
     "docs/readme_fr.md",
+    "docs/readme_ja.md",
+    "docs/readme_ko.md",
+    "docs/readme_uk.md",
     "docs/readme_zh.md"
   ],
   "publishConfig": {

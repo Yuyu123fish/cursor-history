@@ -1,7 +1,7 @@
 # Cursor History
 
 <p align="center">
-  <img src="docs/logo.png" alt="cursor-history logo" width="200">
+  <img src="docs/readme-banner.png" alt="cursor-history — One interface for your entire Cursor history. Composer, Agent transcripts, and Store / ACP sources feed a unified CLI and Node.js API." width="960">
 </p>
 
 [![npm version](https://img.shields.io/npm/v/cursor-history.svg)](https://www.npmjs.com/package/cursor-history)
@@ -10,277 +10,109 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20%2C%2022--26-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)
 
-🇺🇸 [English](./README.md) | 🇨🇳 [中文](./docs/readme_zh.md) | 🇫🇷 [Français](./docs/readme_fr.md) | 🇪🇸 [Español](./docs/readme_es.md)
+🇺🇸 [English](./README.md) | 🇨🇳 [中文](./docs/readme_zh.md) | 🇫🇷 [Français](./docs/readme_fr.md) | 🇪🇸 [Español](./docs/readme_es.md) | 🇯🇵 [日本語](./docs/readme_ja.md) | 🇰🇷 [한국어](./docs/readme_ko.md) | 🇺🇦 [Українська](./docs/readme_uk.md)
 
-**The ultimate open-source tool for browsing, searching, exporting, and backing up your Cursor AI chat history.**
+**One interface for your entire Cursor history.**
 
-A POSIX-style CLI tool that does one thing well: access your Cursor AI chat history. Built on Unix philosophy—simple, composable, and focused.
+Cursor conversations can be spread across workspaces, IDE databases, Agent transcripts, and newer CLI / ACP session stores. `cursor-history` discovers supported local sources and brings them together through one CLI and Node.js library.
+
+Search conversation content across workspaces, inspect messages and available tool activity, and export to Markdown or JSON. Back up and restore Composer history, or migrate supported Composer sessions when projects move.
+
+**Already have months of Cursor history? No prior capture or indexing setup is required.** Search runs locally, with no embeddings or API key.
+
+## Quick Start
 
 ```bash
-# Pipe-friendly: combine with other tools
-cursor-history list --json | jq '.sessions[] | select(.messageCount > 10)'
-cursor-history export 1 | grep -i "api" | head -20
-cursor-history search "bug" --json | jq -r '.results[].sessionId' | xargs -I {} cursor-history export {}
+npm install -g cursor-history
+
+cursor-history list --all
+cursor-history search "authentication"
+cursor-history show 1
+cursor-history export 1
+cursor-history backup
 ```
 
-Never lose a conversation again. Whether you need to find that perfect code snippet from last week, migrate your history to a new machine, or create reliable backups of all your AI-assisted development sessions—cursor-history has you covered. Free, open-source, and built by the community for the community.
+Requires Node.js 20.x or 22.x–26.x and existing local Cursor history. To try without a permanent install, run `npx cursor-history list --all`.
 
-## Example Output
+The numbers in `show` and `export` refer to the list from the same data source and workspace scope; use the session UUID for saved commands. The `backup` command archives Composer databases, not Store databases or transcripts.
 
-### List Sessions
+[Installation](#installation) · [Usage](#usage) · [Example output](#example-output) · [Library API](#library-api) · [Roadmap](#roadmap) · [Compatibility and safe upgrades](#compatibility-and-safe-upgrades)
 
-<pre>
-<span style="color: #888">cursor-history list</span>
+## Why this exists
 
-<span style="color: #5fd7ff">cursor-history</span> - Chat History Browser
+You may remember solving a problem with Cursor without remembering which project, session, or Cursor interface you used. A keyword search across the local history can bring that conversation back.
 
-<span style="color: #5fd7ff">Sessions (showing 3 of 42):</span>
+Cursor's [Agent CLI](https://cursor.com/docs/cli/reference/parameters) provides `agent ls`, `agent resume`, and `agent --resume=<id>` to find or resume CLI sessions. `cursor-history` adds workflows for reading and managing supported local history across workspaces and storage formats.
 
-  <span style="color: #af87ff">#1</span>  <span style="color: #87d787">12/26 09:15 AM</span>  <span style="color: #d7d787">cursor_chat_history</span>
-      <span style="color: #888">15 messages · Updated 2 min ago</span>
-      <span style="color: #fff">"Help me fix the migration path issue..."</span>
+| What you want to do | Where to start |
+|---|---|
+| Continue a conversation in Cursor Agent CLI | Cursor's `agent ls` or `agent --resume=<id>` |
+| Find a phrase in conversation content across workspaces | `cursor-history search "connection pool"` |
+| Read or export a discovered local session | `cursor-history show 1` or `cursor-history export 1` |
+| Back up or restore Composer history | `cursor-history backup` / `cursor-history restore` ([usage](#backup--restore)) |
+| Move supported Composer sessions to another workspace | `cursor-history migrate-session` ([usage](#migrate-sessions)) |
+| Build on history in your own application | The [Node.js API](#library-api) |
 
-  <span style="color: #af87ff">#2</span>  <span style="color: #87d787">12/25 03:22 PM</span>  <span style="color: #d7d787">my-react-app</span>
-      <span style="color: #888">8 messages · Updated 18 hours ago</span>
-      <span style="color: #fff">"Add authentication to the app..."</span>
+## Works across Cursor storage generations and surfaces
 
-  <span style="color: #af87ff">#3</span>  <span style="color: #87d787">12/24 11:30 AM</span>  <span style="color: #d7d787">api-server</span>
-      <span style="color: #888">23 messages · Updated 2 days ago</span>
-      <span style="color: #fff">"Create REST endpoints for users..."</span>
-</pre>
+Different Cursor versions and interfaces can leave different local representations on the same machine. `cursor-history` discovers these supported sources:
 
-### Show Session Details
+| Source | Local files | How they are used |
+|---|---|---|
+| Legacy / Composer | `workspaceStorage/*/state.vscdb` and `globalStorage/state.vscdb` under the Cursor user data directory | Workspace records and global conversation data |
+| Agent transcripts | `~/.cursor/projects/**/agent-transcripts/**/*.jsonl` | Conversation text and tool calls available in the transcript |
+| Store / CLI | `~/.cursor/chats/**/store.db` | Per-session Store conversation data |
+| ACP sessions | `~/.cursor/acp-sessions/**/store.db` | Per-session Store data discovered under the ACP root |
 
-<pre>
-<span style="color: #888">cursor-history show 1</span>
+See [Where Cursor Stores Data](#where-cursor-stores-data) for platform paths, custom roots, and WSL configuration.
 
-<span style="color: #5fd7ff">Session #1</span> · <span style="color: #d7d787">cursor_chat_history</span>
-<span style="color: #888">15 messages · Created 12/26 09:15 AM</span>
+These representations do not always contain the same fields. A transcript may omit timestamps or tool results. When a usable Store database and transcript coexist within scope, the database supplies the Store conversation and the transcript remains provenance. Source details and timestamp provenance distinguish stored information from inferred values and partial views.
 
-────────────────────────────────────────
+Reading support does not imply backup or migration support: current backup archives contain Composer data only, and Store-only or merged-source sessions cannot be migrated. Broader coverage is on the [roadmap](#roadmap). See the [Compatibility and Data-Integrity Contract](./docs/compatibility.md) for the full boundaries.
 
-<span style="color: #87d787">You:</span> <span style="color: #888">09:15:23 AM</span>
+## Three things you can do with your history
 
-Help me fix the migration path issue in the codebase
+### Find it
 
-────────────────────────────────────────
+```bash
+cursor-history list --all
+cursor-history search "connection pool"
+cursor-history show 1
+```
 
-<span style="color: #af87ff">Assistant:</span> <span style="color: #888">09:15:45 AM</span>
+Find the conversation where you already solved the problem, even if it belongs to another workspace. Existing supported local history is searchable without having installed this tool beforehand.
 
-I'll help you fix the migration path issue. Let me first examine
-the relevant files.
+### Preserve it
 
-────────────────────────────────────────
+```bash
+cursor-history export 1
+cursor-history backup
+cursor-history migrate-session 1 /path/to/new/workspace --dry-run
+```
 
-<span style="color: #d7af5f">Tool:</span> <span style="color: #888">09:15:46 AM</span>
-<span style="color: #d7af5f">🔧 Read File</span>
-   <span style="color: #888">File:</span> <span style="color: #5fd7ff">src/core/migrate.ts</span>
-   <span style="color: #888">Content:</span> <span style="color: #fff">export function migrateSession(sessionId: string...</span>
-   <span style="color: #87d787">Status: ✓ completed</span>
+Export readable sessions to Markdown or JSON. Back up Composer history and preview migration of supported Composer sessions before moving them to another workspace.
 
-────────────────────────────────────────
+### Reuse it
 
-<span style="color: #d7af5f">Tool:</span> <span style="color: #888">09:16:02 AM</span>
-<span style="color: #d7af5f">🔧 Edit File</span>
-   <span style="color: #888">File:</span> <span style="color: #5fd7ff">src/core/migrate.ts</span>
+Use the [Node.js library](#library-api) directly, or connect the separate [cursor-history-mcp](https://github.com/S2thend/cursor-history-mcp) server so an MCP-capable assistant can search your existing development history.
 
-   <span style="color: #87d787">```diff</span>
-<span style="color: #87d787">   + function transformPath(path: string): string {</span>
-<span style="color: #87d787">   +   return path.replace(sourcePrefix, destPrefix);</span>
-<span style="color: #87d787">   + }</span>
-   <span style="color: #87d787">```</span>
-
-   <span style="color: #87d787">Status: ✓ completed</span>
-
-────────────────────────────────────────
-
-<span style="color: #5f87d7">Thinking:</span> <span style="color: #888">09:16:02 AM</span>
-<span style="color: #5f87d7">💭</span> <span style="color: #888">Now I need to update the function to call transformPath
-   for each file reference in the bubble data...</span>
-
-────────────────────────────────────────
-
-<span style="color: #af87ff">Assistant:</span> <span style="color: #888">09:16:30 AM</span>
-
-I've added the path transformation logic. The migration will now
-update all file paths when moving sessions between workspaces.
-
-────────────────────────────────────────
-
-<span style="color: #ff5f5f">Error:</span> <span style="color: #888">09:17:01 AM</span>
-<span style="color: #ff5f5f">❌</span> <span style="color: #ff5f5f">Build failed: Cannot find module './utils'</span>
-
-────────────────────────────────────────
-</pre>
+Months of decisions, fixes, prompts, and tool activity may already be on disk. Make that context easier to find the next time you need it.
 
 ## Features
 
 - **Dual interface** - Use as CLI tool or import as a library in your Node.js projects
 - **List sessions** - View all chat sessions across workspaces
-- **View full conversations** - See complete chat history with:
+- **View conversations** - Inspect the content available in each source, including:
   - AI responses with natural language explanations
   - **Full diff display** for file edits and writes with syntax highlighting
   - **Detailed tool calls** showing all parameters (file paths, search patterns, commands, etc.)
   - AI reasoning and thinking blocks
   - Message timestamps with explicit stored/inferred provenance
-- **Search** - Find conversations by keyword with highlighted matches
+- **Search** - Search conversation content across workspaces by keyword with highlighted matches
 - **Export** - Save sessions as Markdown or JSON files
-- **Migrate** - Move or copy sessions between workspaces (e.g., when renaming projects)
-- **Backup & Restore** - Create full backups of all chat history and restore when needed
+- **Migrate** - Move or copy supported Composer sessions between workspaces (e.g., when renaming projects)
+- **Backup & Restore** - Back up Composer databases and restore them when needed
 - **Cross-platform** - Works on macOS, Windows, and Linux
-
-## Compatibility and safe upgrades
-
-The authoritative identity, scoped-index, workspace-I/O, source-fidelity, timestamp, input-limit,
-backup-permission, and upgrade rules are in the shipped
-[Compatibility and Data-Integrity Contract](./docs/compatibility.md). Library consumers that persist
-cursor-history output should read that contract before changing versions.
-
-### Warning for v0.17 incremental-library consumers
-
-v0.17 introduced transitional Store/merged behavior that can change positional message keys,
-replacement signals, and timestamp-watermark assumptions. If your application incrementally stores
-library output—such as a vibe-history archive—keep cursor-history v0.16 pinned until you can validate
-the 0.18.0 corrective path. Back up the downstream archive before upgrading.
-
-The confirmed no-consumer-change upgrade path is deliberately narrower: an archive populated from
-v0.16 Composer-only data can become a complete Composer-backed merged view while retaining every
-old session, Composer-message, and existing ordinal-derived tool key byte-for-byte. A changed
-complete view still reports `source: "global"`, so the unchanged consumer performs its existing
-whole-session atomic replacement; a second identical sync performs no session/content mutations.
-The unchanged consumer still executes one existing `sync_metadata` schema-version upsert statement
-per synchronization; a fresh target may initialize that metadata row, while later same-version
-upserts are value-preserving bookkeeping outside the session/content mutation count. Store-only turns
-may be interleaved without renumbering old Composer identities. Do not use a maximum timestamp as the
-incremental boundary, and never replace complete archived data with
-`source: "workspace-fallback"`.
-
-Complete affected v0.17 Store/merged data instead has a documented one-time whole-session
-replacement path. Unstable v0.17 Store positional/cross-format synthetic IDs are not preserved. A
-degraded v0.17 result must be pinned, retried from complete sources, or migrated manually.
-
-### Identity, addressing, and source meaning
-
-- `Session.id` remains the native Cursor UUID. Physical source instances and locators are separate
-  and are never encoded into the public ID.
-- CLI/core indices are one-based, public-library read indices are zero-based, and public-library
-  migration selectors are one-based. All are ephemeral within the exact data source, workspace,
-  catalog snapshot, and invocation that produced them; persist the native UUID instead.
-- Migration resolves both numbers and UUIDs through the complete scoped logical catalog. Ambiguous
-  rows retain their displayed positions and return the same typed ambiguity by either selector;
-  they are never skipped, shifted, treated as not found, or mutated.
-- For unchanged Composer input, sessions tied on `createdAt` retain v0.16's stable discovery
-  order. Composer-backed merged or ambiguous rows keep that tie position; new-only rows follow the
-  legacy tie group in deterministic UUID order.
-- Structured numeric output declares `indexScope: "global" | "workspace"`; workspace rows also
-  carry the full `indexWorkspacePath`.
-- Workspace matching uses normalized exact matching first, then one unambiguous complete-component
-  suffix. Ambiguity fails before conversation payload is read.
-- A workspace is a payload-I/O boundary by default. `--include-cross-workspace-sources` or
-  `includeCrossWorkspaceSources: true` can load complementary sources only for UUIDs already
-  selected in scope; omitted contributors make the default view explicitly partial.
-- Legacy `source` reports fidelity: `global` is complete/replacement-safe and
-  `workspace-fallback` is partial/unsafe to overwrite complete data. `resolvedSource`, `sources`,
-  and `resolution` report actual Composer/Store provenance additively.
-- Every resolved message includes deterministic timestamp provenance. Human output marks inferred
-  times as approximate; JSON/library consumers receive `timestampSource`. A legacy timestamp of
-  unprovable origin is retained as `unknown`, not presented as directly stored.
-- When a usable Store database and transcript coexist inside the permitted scope, this is a
-  supported normal case: the database is the sole Store conversation backbone and the transcript
-  is retained as superseded provenance rather than merged heuristically. A known representation
-  outside the workspace I/O boundary is not opened and makes the scoped view explicitly partial.
-
-Round-trip a CLI index only inside the same workspace scope:
-
-```bash
-cursor-history --json --workspace /work/a list --all
-cursor-history --json --workspace /work/a show 1
-cursor-history --json --workspace /work/a search needle-a
-cursor-history --workspace /work/a migrate-session 1 /work/destination --dry-run
-```
-
-Use a stable UUID for reusable library addressing (read indices are zero-based):
-
-```typescript
-import { getSession, listSessions } from 'cursor-history';
-
-const workspace = '/work/a';
-const page = await listSessions({ workspace, limit: 20 });
-const first = page.data[0];
-
-if (first) {
-  const session = await getSession(first.id, { workspace });
-  console.log(session.id, session.source, session.resolvedSource);
-}
-```
-
-Fatal JSON migration note: some v0.17 command-owned failures wrote JSON to stdout. The corrective
-release writes every fatal JSON object to stderr and leaves stdout empty; successful output remains
-on stdout. Existing error fields/types/values and exit-category meanings are preserved for the same
-fixture, with only documented safe additive fields allowed. Scripts that parsed fatal JSON from
-stdout must read stderr after a nonzero exit.
-
-Public-library search correction in 0.18.0: existing `messageIndex` now identifies the matched
-message in the complete returned `session.messages` array, `offset` is a zero-based UTF-16
-code-unit position in that message's complete original content, and `match`/context values are
-complete original source lines. v0.16/v0.17 returned placeholder or snippet-relative values;
-consumers that persisted those coordinates must recompute them after upgrade. Session, message, and
-tool identities do not change under this correction. Public-library JSON exports also gain an
-additive zero-based `index`; v0.16/v0.17 exports omitted that property.
-
-### Backup permissions
-
-Temporary plaintext snapshot workspaces are owner-only (`0700` directories and `0600` files on
-POSIX) and cleaned on success and failure. New final archives default to `0600`; force-overwrite
-preserves an existing mode. `backup --shared` explicitly requests `0666 & ~currentUmask` without
-broadening temporary files, changing the process umask, or modifying parent permissions. Windows
-uses its system per-user temporary directory, inherited ACLs, exclusive paths, and the same cleanup
-contract; this release does not claim independently verified cross-user ACL isolation on Windows.
-New manifests record the actual running package version as diagnostic `producer` metadata; it never
-changes session/message identity, replica equivalence, deduplication, or incremental sync.
-New backups keep the enclosing `manifest.version` at `1.0.0` and add an optional canonical
-metadata-only Composer workspace/UUID inventory with its own independently validated
-`schemaVersion: 1`; existing v1 readers may ignore this additive field. This
-lets `--workspace` select an archived workspace without extracting other workspace databases. A
-scoped backup read never extracts the shared global database; it returns the selected workspace
-view as explicitly partial. Legacy backups with one workspace remain scoped-readable, while legacy
-multi-workspace backups without this inventory fail closed with
-`BACKUP_WORKSPACE_SCOPE_METADATA_REQUIRED` before database extraction.
-
-Session-ID lookup is byte-exact and case-sensitive, including for canonical UUID syntax, matching
-v0.16 behavior. Persist and reuse the exact `Session.id` spelling returned by Cursor. A differently
-cased value is a distinct ID: it is not an alias for lookup, grouping, Composer/Store association,
-or migration.
-
-Rename/link to the requested backup path is the publication commit point. If a later permission
-read, adjustment, or identity check fails, the command exits nonzero with
-`BACKUP_PUBLISHED_PERMISSION_FAILED`. `details.published: true` means the commit point was crossed;
-trust the reported pathname and inspect/correct its mode only when
-`details.pathIdentityVerified: true`. When it is false, the pathname may have been replaced or
-become unverifiable: do not chmod it based on the error, do not assume rollback, and do not blindly
-retry with `--force`.
-On POSIX the permission step follows no links: it verifies the published regular file has the same
-lossless device/inode identity as private staging, changes mode only through that open descriptor,
-and rechecks the final path. A replacement race fails without chmodding the replacement.
-If non-force publication commits but its private sibling cannot be removed safely,
-`BACKUP_PUBLISHED_CLEANUP_FAILED` reports output-path identity plus verified and unverified residue
-paths. Never blindly delete, chmod, or force-retry an unverified path; a concurrent replacement is
-left untouched.
-
-Restore rejects empty inventories, unmanifested file payloads, invalid manifest type/path pairs,
-duplicate destinations, and observed links beneath the canonical selected Cursor user root. It
-stages only size/checksum-valid entries and preflights all destinations; `--force` does not bypass
-those checks. Integrity-mismatched entries are reported and skipped. New destinations use an
-atomic no-clobber publication, while forced replacements publish a new owner-private same-directory
-inode instead of writing through an existing hard link. Portable Node path APIs cannot atomically
-compare and then replace or unlink a destination, so a failure after any publication never attempts
-automatic rollback. It leaves every published destination untouched and throws typed
-`RESTORE_ROLLBACK_INCOMPLETE` details containing all safe manifest-relative residual entries plus
-any verified or unverified private temporary residue paths. Stop Cursor and recover those entries
-from a known-good backup; never blindly delete an unverified path.
-Use an owner-controlled destination tree: Node 20 has no portable directory-relative no-follow
-creation API, so restore does not claim atomic defense against a hostile process swapping an
-ancestor between the final validation and directory-entry publication.
 
 ## Installation
 
@@ -338,7 +170,7 @@ node dist/cli/index.js show 1 --json
 ## Requirements
 
 - Node.js 20.x or 22.x–26.x (Node 21 is not supported; Node.js 22.5+ is recommended for built-in SQLite support)
-- Cursor IDE (with existing chat history)
+- Existing local history from Cursor IDE or Agent CLI in a supported format
 
 ## SQLite Driver Configuration
 
@@ -440,8 +272,8 @@ cursor-history show 1 --short
 # Show full AI thinking/reasoning text
 cursor-history show 1 --think
 
-# Show full file read content (not truncated)
-cursor-history show 1 --fullread
+# Show full tool call details (commands, content, results)
+cursor-history show 1 --tool
 
 # Show full error messages (not truncated to 300 chars)
 cursor-history show 1 --error
@@ -452,7 +284,7 @@ cursor-history show 1 --only user,assistant
 cursor-history show 1 --only tool,error
 
 # Combine options
-cursor-history show 1 --short --think --fullread --error
+cursor-history show 1 --short --think --tool --error
 cursor-history show 1 --only user,assistant --short
 
 # Output as JSON
@@ -493,6 +325,8 @@ cursor-history export 1 --force
 
 ### Migrate Sessions
 
+Migration supports eligible Composer sessions. Store-only, merged-source, and ambiguous sessions are rejected; use `--dry-run` to preview a migration.
+
 ```bash
 # Move a single session to another workspace
 cursor-history migrate-session 1 /path/to/new/project
@@ -518,8 +352,10 @@ cursor-history migrate --force /old/project /existing/project
 
 ### Backup & Restore
 
+Backup archives contain Composer `state.vscdb` data. They do not include Store databases, Agent transcripts, or ACP session stores. Export readable sessions from those sources to Markdown or JSON when you need a portable copy; exports are not restorable backup archives.
+
 ```bash
-# Create a backup of all chat history
+# Create a backup of Composer chat history
 cursor-history backup
 
 # Create backup to specific file
@@ -563,6 +399,94 @@ cursor-history --data-path ~/.cursor-alt list
 cursor-history --workspace /path/to/project list
 ```
 
+## Example Output
+
+### List Sessions
+
+<pre>
+<span style="color: #888">cursor-history list</span>
+
+<span style="color: #5fd7ff">cursor-history</span> - Chat History Browser
+
+<span style="color: #5fd7ff">Sessions (showing 3 of 42):</span>
+
+  <span style="color: #af87ff">#1</span>  <span style="color: #87d787">12/26 09:15 AM</span>  <span style="color: #d7d787">cursor_chat_history</span>
+      <span style="color: #888">15 messages · Updated 2 min ago</span>
+      <span style="color: #fff">"Help me fix the migration path issue..."</span>
+
+  <span style="color: #af87ff">#2</span>  <span style="color: #87d787">12/25 03:22 PM</span>  <span style="color: #d7d787">my-react-app</span>
+      <span style="color: #888">8 messages · Updated 18 hours ago</span>
+      <span style="color: #fff">"Add authentication to the app..."</span>
+
+  <span style="color: #af87ff">#3</span>  <span style="color: #87d787">12/24 11:30 AM</span>  <span style="color: #d7d787">api-server</span>
+      <span style="color: #888">23 messages · Updated 2 days ago</span>
+      <span style="color: #fff">"Create REST endpoints for users..."</span>
+</pre>
+
+### Show Session Details
+
+<pre>
+<span style="color: #888">cursor-history show 1</span>
+
+<span style="color: #5fd7ff">Session #1</span> · <span style="color: #d7d787">cursor_chat_history</span>
+<span style="color: #888">15 messages · Created 12/26 09:15 AM</span>
+
+────────────────────────────────────────
+
+<span style="color: #87d787">You:</span> <span style="color: #888">09:15:23 AM</span>
+
+Help me fix the migration path issue in the codebase
+
+────────────────────────────────────────
+
+<span style="color: #af87ff">Assistant:</span> <span style="color: #888">09:15:45 AM</span>
+
+I'll help you fix the migration path issue. Let me first examine
+the relevant files.
+
+────────────────────────────────────────
+
+<span style="color: #d7af5f">Tool:</span> <span style="color: #888">09:15:46 AM</span>
+<span style="color: #d7af5f">🔧 Read File</span>
+   <span style="color: #888">File:</span> <span style="color: #5fd7ff">src/core/migrate.ts</span>
+   <span style="color: #888">Content:</span> <span style="color: #fff">export function migrateSession(sessionId: string...</span>
+   <span style="color: #87d787">Status: ✓ completed</span>
+
+────────────────────────────────────────
+
+<span style="color: #d7af5f">Tool:</span> <span style="color: #888">09:16:02 AM</span>
+<span style="color: #d7af5f">🔧 Edit File</span>
+   <span style="color: #888">File:</span> <span style="color: #5fd7ff">src/core/migrate.ts</span>
+
+   <span style="color: #87d787">```diff</span>
+<span style="color: #87d787">   + function transformPath(path: string): string {</span>
+<span style="color: #87d787">   +   return path.replace(sourcePrefix, destPrefix);</span>
+<span style="color: #87d787">   + }</span>
+   <span style="color: #87d787">```</span>
+
+   <span style="color: #87d787">Status: ✓ completed</span>
+
+────────────────────────────────────────
+
+<span style="color: #5f87d7">Thinking:</span> <span style="color: #888">09:16:02 AM</span>
+<span style="color: #5f87d7">💭</span> <span style="color: #888">Now I need to update the function to call transformPath
+   for each file reference in the bubble data...</span>
+
+────────────────────────────────────────
+
+<span style="color: #af87ff">Assistant:</span> <span style="color: #888">09:16:30 AM</span>
+
+I've added the path transformation logic. The migration will now
+update all file paths when moving sessions between workspaces.
+
+────────────────────────────────────────
+
+<span style="color: #ff5f5f">Error:</span> <span style="color: #888">09:17:01 AM</span>
+<span style="color: #ff5f5f">❌</span> <span style="color: #ff5f5f">Build failed: Cannot find module './utils'</span>
+
+────────────────────────────────────────
+</pre>
+
 ## What You Can View
 
 When browsing your chat history, you'll see:
@@ -577,7 +501,7 @@ When browsing your chat history, you'll see:
   than an unconditional field union.
 - **AI tool actions** - Detailed view of what Cursor AI did:
   - **File edits/writes** - Full diff display with syntax highlighting showing exactly what changed
-  - **File reads** - File paths and content previews (use `--fullread` for complete content)
+  - **File reads** - File paths and content previews (use `--tool` for complete content)
   - **Search operations** - Patterns, paths, and search queries used
   - **Terminal commands** - Complete command text
   - **Directory listings** - Paths explored
@@ -593,7 +517,7 @@ When browsing your chat history, you'll see:
 - **Default view** - Full messages with truncated thinking (200 chars), file reads (100 chars), and errors (300 chars)
 - **`--short` mode** - Truncates user and assistant messages to 300 chars for quick scanning
 - **`--think` flag** - Shows complete AI reasoning/thinking text (not truncated)
-- **`--fullread` flag** - Shows full file read content instead of previews
+- **`--tool` flag** - Shows full tool call details, including commands, content, and results
 - **`--error` flag** - Shows full error messages instead of 300-char preview
 - **`--only <types>` flag** - Filter messages by type: `user`, `assistant`, `tool`, `thinking`, `error` (comma-separated)
 
@@ -749,7 +673,7 @@ const sessions = await listSessions({ backupPath: '~/backup.zip' });
 | `exportAllSessionsToMarkdown(config?)` | Export all sessions to Markdown |
 | `migrateSession(config)` | Move/copy sessions to another workspace |
 | `migrateWorkspace(config)` | Move/copy all sessions between workspaces |
-| `createBackup(config?)` | Create full backup of all chat history |
+| `createBackup(config?)` | Back up Composer chat history |
 | `restoreBackup(config)` | Restore chat history from backup |
 | `validateBackup(path)` | Validate backup integrity |
 | `listBackups(directory?)` | List available backup files |
@@ -849,6 +773,171 @@ try {
   }
 }
 ```
+
+## Compatibility and safe upgrades
+
+The authoritative identity, scoped-index, workspace-I/O, source-fidelity, timestamp, input-limit,
+backup-permission, and upgrade rules are in the shipped
+[Compatibility and Data-Integrity Contract](./docs/compatibility.md). Library consumers that persist
+cursor-history output should read that contract before changing versions.
+
+### Warning for v0.17 incremental-library consumers
+
+v0.17 introduced transitional Store/merged behavior that can change positional message keys,
+replacement signals, and timestamp-watermark assumptions. If your application incrementally stores
+library output—such as a vibe-history archive—keep cursor-history v0.16 pinned until you can validate
+the 0.18.0 corrective path. Back up the downstream archive before upgrading.
+
+The confirmed no-consumer-change upgrade path is deliberately narrower: an archive populated from
+v0.16 Composer-only data can become a complete Composer-backed merged view while retaining every
+old session, Composer-message, and existing ordinal-derived tool key byte-for-byte. A changed
+complete view still reports `source: "global"`, so the unchanged consumer performs its existing
+whole-session atomic replacement; a second identical sync performs no session/content mutations.
+The unchanged consumer still executes one existing `sync_metadata` schema-version upsert statement
+per synchronization; a fresh target may initialize that metadata row, while later same-version
+upserts are value-preserving bookkeeping outside the session/content mutation count. Store-only turns
+may be interleaved without renumbering old Composer identities. Do not use a maximum timestamp as the
+incremental boundary, and never replace complete archived data with
+`source: "workspace-fallback"`.
+
+Complete affected v0.17 Store/merged data instead has a documented one-time whole-session
+replacement path. Unstable v0.17 Store positional/cross-format synthetic IDs are not preserved. A
+degraded v0.17 result must be pinned, retried from complete sources, or migrated manually.
+
+### Identity, addressing, and source meaning
+
+- `Session.id` remains the native Cursor UUID. Physical source instances and locators are separate
+  and are never encoded into the public ID.
+- CLI/core indices are one-based, public-library read indices are zero-based, and public-library
+  migration selectors are one-based. All are ephemeral within the exact data source, workspace,
+  catalog snapshot, and invocation that produced them; persist the native UUID instead.
+- Migration resolves both numbers and UUIDs through the complete scoped logical catalog. Ambiguous
+  rows retain their displayed positions and return the same typed ambiguity by either selector;
+  they are never skipped, shifted, treated as not found, or mutated.
+- For unchanged Composer input, sessions tied on `createdAt` retain v0.16's stable discovery
+  order. Composer-backed merged or ambiguous rows keep that tie position; new-only rows follow the
+  legacy tie group in deterministic UUID order.
+- Structured numeric output declares `indexScope: "global" | "workspace"`; workspace rows also
+  carry the full `indexWorkspacePath`.
+- Workspace matching uses normalized exact matching first, then one unambiguous complete-component
+  suffix. Ambiguity fails before conversation payload is read.
+- A workspace is a payload-I/O boundary by default. `--include-cross-workspace-sources` or
+  `includeCrossWorkspaceSources: true` can load complementary sources only for UUIDs already
+  selected in scope; omitted contributors make the default view explicitly partial.
+- Legacy `source` reports fidelity: `global` is complete/replacement-safe and
+  `workspace-fallback` is partial/unsafe to overwrite complete data. `resolvedSource`, `sources`,
+  and `resolution` report actual Composer/Store provenance additively.
+- Every resolved message includes deterministic timestamp provenance. Human output marks inferred
+  times as approximate; JSON/library consumers receive `timestampSource`. A legacy timestamp of
+  unprovable origin is retained as `unknown`, not presented as directly stored.
+- When a usable Store database and transcript coexist inside the permitted scope, this is a
+  supported normal case: the database is the sole Store conversation backbone and the transcript
+  is retained as superseded provenance rather than merged heuristically. A known representation
+  outside the workspace I/O boundary is not opened and makes the scoped view explicitly partial.
+
+Round-trip a CLI index only inside the same workspace scope:
+
+```bash
+cursor-history --json --workspace /work/a list --all
+cursor-history --json --workspace /work/a show 1
+cursor-history --json --workspace /work/a search needle-a
+cursor-history --workspace /work/a migrate-session 1 /work/destination --dry-run
+```
+
+Use a stable UUID for reusable library addressing (read indices are zero-based):
+
+```typescript
+import { getSession, listSessions } from 'cursor-history';
+
+const workspace = '/work/a';
+const page = await listSessions({ workspace, limit: 20 });
+const first = page.data[0];
+
+if (first) {
+  const session = await getSession(first.id, { workspace });
+  console.log(session.id, session.source, session.resolvedSource);
+}
+```
+
+Fatal JSON migration note: some v0.17 command-owned failures wrote JSON to stdout. The corrective
+release writes every fatal JSON object to stderr and leaves stdout empty; successful output remains
+on stdout. Existing error fields/types/values and exit-category meanings are preserved for the same
+fixture, with only documented safe additive fields allowed. Scripts that parsed fatal JSON from
+stdout must read stderr after a nonzero exit.
+
+Public-library search correction in 0.18.0: existing `messageIndex` now identifies the matched
+message in the complete returned `session.messages` array, `offset` is a zero-based UTF-16
+code-unit position in that message's complete original content, and `match`/context values are
+complete original source lines. v0.16/v0.17 returned placeholder or snippet-relative values;
+consumers that persisted those coordinates must recompute them after upgrade. Session, message, and
+tool identities do not change under this correction. Public-library JSON exports also gain an
+additive zero-based `index`; v0.16/v0.17 exports omitted that property.
+
+### Backup permissions
+
+Temporary plaintext snapshot workspaces are owner-only (`0700` directories and `0600` files on
+POSIX) and cleaned on success and failure. New final archives default to `0600`; force-overwrite
+preserves an existing mode. `backup --shared` explicitly requests `0666 & ~currentUmask` without
+broadening temporary files, changing the process umask, or modifying parent permissions. Windows
+uses its system per-user temporary directory, inherited ACLs, exclusive paths, and the same cleanup
+contract; this release does not claim independently verified cross-user ACL isolation on Windows.
+New manifests record the actual running package version as diagnostic `producer` metadata; it never
+changes session/message identity, replica equivalence, deduplication, or incremental sync.
+New backups keep the enclosing `manifest.version` at `1.0.0` and add an optional canonical
+metadata-only Composer workspace/UUID inventory with its own independently validated
+`schemaVersion: 1`; existing v1 readers may ignore this additive field. This
+lets `--workspace` select an archived workspace without extracting other workspace databases. A
+scoped backup read never extracts the shared global database; it returns the selected workspace
+view as explicitly partial. Legacy backups with one workspace remain scoped-readable, while legacy
+multi-workspace backups without this inventory fail closed with
+`BACKUP_WORKSPACE_SCOPE_METADATA_REQUIRED` before database extraction.
+
+Session-ID lookup is byte-exact and case-sensitive, including for canonical UUID syntax, matching
+v0.16 behavior. Persist and reuse the exact `Session.id` spelling returned by Cursor. A differently
+cased value is a distinct ID: it is not an alias for lookup, grouping, Composer/Store association,
+or migration.
+
+Rename/link to the requested backup path is the publication commit point. If a later permission
+read, adjustment, or identity check fails, the command exits nonzero with
+`BACKUP_PUBLISHED_PERMISSION_FAILED`. `details.published: true` means the commit point was crossed;
+trust the reported pathname and inspect/correct its mode only when
+`details.pathIdentityVerified: true`. When it is false, the pathname may have been replaced or
+become unverifiable: do not chmod it based on the error, do not assume rollback, and do not blindly
+retry with `--force`.
+On POSIX the permission step follows no links: it verifies the published regular file has the same
+lossless device/inode identity as private staging, changes mode only through that open descriptor,
+and rechecks the final path. A replacement race fails without chmodding the replacement.
+If non-force publication commits but its private sibling cannot be removed safely,
+`BACKUP_PUBLISHED_CLEANUP_FAILED` reports output-path identity plus verified and unverified residue
+paths. Never blindly delete, chmod, or force-retry an unverified path; a concurrent replacement is
+left untouched.
+
+Restore rejects empty inventories, unmanifested file payloads, invalid manifest type/path pairs,
+duplicate destinations, and observed links beneath the canonical selected Cursor user root. It
+stages only size/checksum-valid entries and preflights all destinations; `--force` does not bypass
+those checks. Integrity-mismatched entries are reported and skipped. New destinations use an
+atomic no-clobber publication, while forced replacements publish a new owner-private same-directory
+inode instead of writing through an existing hard link. Portable Node path APIs cannot atomically
+compare and then replace or unlink a destination, so a failure after any publication never attempts
+automatic rollback. It leaves every published destination untouched and throws typed
+`RESTORE_ROLLBACK_INCOMPLETE` details containing all safe manifest-relative residual entries plus
+any verified or unverified private temporary residue paths. Stop Cursor and recover those entries
+from a known-good backup; never blindly delete an unverified path.
+Use an owner-controlled destination tree: Node 20 has no portable directory-relative no-follow
+creation API, so restore does not claim atomic defense against a hostile process swapping an
+ancestor between the final validation and directory-entry publication.
+
+## Roadmap
+
+Extend preservation and migration to the newer sources already supported for reading. These are planned directions; no release version or date is committed yet.
+
+- [ ] **Store / ACP backup and restore** — Include Store databases, Agent transcripts, and associated metadata in restorable archives, preserving source relationships and validating round trips.
+- [ ] **Store-only session migration** — Move or copy Store-only sessions between workspaces, with workspace bindings and path references updated and checked against Cursor's session discovery.
+- [ ] **Merged-source session migration** — Move or copy sessions represented in both Composer and Store while preserving native identities and keeping the contributing sources consistent.
+
+Until these land, [backup and restore](#backup--restore) cover Composer data, and [migration](#migrate-sessions) supports eligible Composer sessions. Markdown and JSON exports remain available for readable Store / ACP sessions, but are not restorable backup archives.
+
+Share use cases and reproducible storage examples through [GitHub Issues](https://github.com/S2thend/cursor-history/issues) to help prioritize this work.
 
 ## Development
 

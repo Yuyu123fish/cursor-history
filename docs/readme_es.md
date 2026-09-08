@@ -1,7 +1,7 @@
 # Cursor History
 
 <p align="center">
-  <img src="logo.png" alt="cursor-history logo" width="200">
+  <img src="readme-banner.png" alt="cursor-history: una interfaz para todo tu historial de Cursor. Composer, Agent transcripts y Store / ACP convergen en un CLI y una API de Node.js unificados." width="960">
 </p>
 
 [![npm version](https://img.shields.io/npm/v/cursor-history.svg)](https://www.npmjs.com/package/cursor-history)
@@ -10,53 +10,108 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20%2C%2022--26-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0%2B-blue.svg)](https://www.typescriptlang.org/)
 
-> **Contrato de compatibilidad:** el documento canónico en inglés
-> [Compatibility and Data-Integrity Contract](./compatibility.md) define la identidad estable, el
-> alcance y base de los índices, el límite de E/S por espacio de trabajo, la fidelidad/procedencia,
-> los tiempos inferidos, los límites de lectura, los permisos de respaldo y los ejemplos
-> verificados de CLI/biblioteca. En caso de diferencia, ese contrato es la fuente de verdad.
->
-> Los consumidores incrementales de la biblioteca deben fijar v0.16 hasta poder validar v0.18.0
-> antes de actualizar desde v0.17. El camino sin cambios en el consumidor está garantizado
-> para archivos v0.16 que solo contienen Composer; no garantiza conservar IDs sintéticos Store
-> inestables de v0.17.
->
-> v0.18.0 corrige directamente las coordenadas públicas de búsqueda de v0.16/v0.17 y añade el
-> índice cero-basado a la exportación JSON como metadato nuevo. El contrato canónico también define
-> el punto de publicación y los errores tipados de permisos o limpieza posteriores a una copia de
-> seguridad ya publicada; las rutas de residuo no verificadas nunca deben borrarse a ciegas.
-> La restauración omite entradas corruptas y rechaza rutas, destinos duplicados o enlaces inseguros
-> antes de escribir; `--force` no desactiva estas comprobaciones de integridad y confinamiento. Tras
-> publicar cualquier archivo, un fallo no intenta una reversión automática: conserva todas las
-> hojas y devuelve `RESTORE_ROLLBACK_INCOMPLETE`; detenga Cursor y recupere desde una copia fiable.
+🇺🇸 [English](../README.md) | 🇨🇳 [中文](./readme_zh.md) | 🇫🇷 [Français](./readme_fr.md) | 🇪🇸 [Español](./readme_es.md) | 🇯🇵 [日本語](./readme_ja.md) | 🇰🇷 [한국어](./readme_ko.md) | 🇺🇦 [Українська](./readme_uk.md)
 
-**La herramienta de código abierto definitiva para navegar, buscar, exportar y respaldar tu historial de chat de Cursor AI.**
+**Una interfaz para todo tu historial de Cursor.**
 
-Una herramienta CLI de estilo POSIX que hace una cosa bien: acceder a tu historial de chat de Cursor AI. Construida sobre la filosofía Unix — simple, componible y enfocada.
+Las conversaciones de Cursor pueden estar repartidas entre espacios de trabajo, bases de datos del IDE, transcripciones de Agent y almacenes de sesiones CLI / ACP más recientes. `cursor-history` descubre las fuentes locales compatibles y permite acceder a ellas mediante un CLI y una biblioteca de Node.js.
+
+Busca en el contenido de las conversaciones de varios espacios de trabajo, consulta los mensajes y la actividad de herramientas disponible, y exporta a Markdown o JSON. Respalda y restaura el historial de Composer, o migra las sesiones de Composer compatibles cuando tus proyectos cambien de ubicación.
+
+**¿Ya tienes meses de historial de Cursor? No necesitas capturarlo previamente ni configurar un índice.** La búsqueda se ejecuta en local, sin embeddings ni clave de API.
+
+## Inicio rápido
 
 ```bash
-# Compatible con pipes: combina con otras herramientas
-cursor-history list --json | jq '.sessions[] | select(.messageCount > 10)'
-cursor-history export 1 | grep -i "api" | head -20
-cursor-history search "bug" --json | jq -r '.results[].sessionId' | xargs -I {} cursor-history export {}
+npm install -g cursor-history
+
+cursor-history list --all
+cursor-history search "authentication"
+cursor-history show 1
+cursor-history export 1
+cursor-history backup
 ```
 
-Nunca pierdas una conversación otra vez. Ya sea que necesites encontrar ese fragmento de código perfecto de la semana pasada, migrar tu historial a una nueva máquina, o crear respaldos confiables de todas tus sesiones de desarrollo asistido por IA — cursor-history te tiene cubierto. Gratis, de código abierto, y construido por la comunidad para la comunidad.
+Requiere Node.js 20.x o 22.x–26.x y un historial local de Cursor existente. Para probarlo sin una instalación permanente: `npx cursor-history list --all`.
+
+Los números de `show` y `export` corresponden a la lista de la misma fuente de datos y el mismo ámbito de espacio de trabajo; usa el UUID de la sesión en los comandos que guardes. `backup` archiva las bases de Composer, no las de Store ni las transcripciones.
+
+[Instalación](#instalación) · [Uso](#uso) · [Ejemplos de salida](../README.md#example-output) · [API de biblioteca](#api-de-biblioteca) · [Hoja de ruta](#hoja-de-ruta) · [Compatibilidad](#compatibilidad-y-actualizaciones)
+
+## Por qué existe esta herramienta
+
+Quizá recuerdes haber resuelto un problema con Cursor, pero no en qué proyecto, sesión o interfaz. Una búsqueda por palabra clave en el historial local puede ayudarte a recuperar esa conversación.
+
+El [CLI de Agent de Cursor](https://cursor.com/docs/cli/reference/parameters) ofrece `agent ls`, `agent resume` y `agent --resume=<id>` para encontrar o retomar sesiones del CLI. `cursor-history` añade flujos para leer y gestionar el historial local compatible entre espacios de trabajo y formatos de almacenamiento.
+
+| Qué quieres hacer | Por dónde empezar |
+|---|---|
+| Retomar una conversación en Cursor Agent CLI | `agent ls` o `agent --resume=<id>` de Cursor |
+| Buscar una frase en conversaciones de varios espacios de trabajo | `cursor-history search "connection pool"` |
+| Leer o exportar una sesión local descubierta | `cursor-history show 1` o `cursor-history export 1` |
+| Respaldar o restaurar el historial de Composer | `cursor-history backup` / `cursor-history restore` ([uso](#respaldo-y-restauración)) |
+| Mover sesiones de Composer compatibles a otro espacio de trabajo | `cursor-history migrate-session` ([uso](#migrar-sesiones)) |
+| Usar el historial desde tu propia aplicación | [API de Node.js](#api-de-biblioteca) |
+
+## Varias generaciones de almacenamiento e interfaces de Cursor
+
+Distintas versiones e interfaces de Cursor pueden dejar diferentes representaciones locales en la misma máquina. `cursor-history` descubre estas fuentes compatibles:
+
+| Fuente | Archivos locales | Uso |
+|---|---|---|
+| Formato antiguo / Composer | `workspaceStorage/*/state.vscdb` y `globalStorage/state.vscdb` en el directorio de usuario de Cursor | Registros de espacios de trabajo y datos globales de conversaciones |
+| Transcripciones de Agent | `~/.cursor/projects/**/agent-transcripts/**/*.jsonl` | Texto de conversaciones y llamadas de herramientas presentes en la transcripción |
+| Store / CLI | `~/.cursor/chats/**/store.db` | Datos de conversación de Store por sesión |
+| Sesiones ACP | `~/.cursor/acp-sessions/**/store.db` | Datos de Store descubiertos bajo la raíz de ACP |
+
+Consulta [Dónde almacena datos Cursor](#dónde-almacena-datos-cursor) para ver rutas por plataforma, raíces personalizadas y configuración de WSL.
+
+Estas representaciones no siempre contienen los mismos campos. Una transcripción puede omitir marcas de tiempo o resultados de herramientas. Cuando coexisten una base de Store utilizable y una transcripción dentro del ámbito permitido, la base aporta la conversación de Store y la transcripción se conserva como procedencia. Los detalles de fuente y de procedencia temporal permiten distinguir datos almacenados, valores inferidos y vistas parciales.
+
+Poder leer una fuente no implica poder respaldarla o migrarla: los archivos de respaldo actuales solo contienen Composer, y las sesiones Store-only o de fuentes combinadas no se pueden migrar. La ampliación está en la [hoja de ruta](#hoja-de-ruta). Consulta los límites completos en el [contrato de compatibilidad e integridad](./compatibility.md).
+
+## Tres formas de usar tu historial
+
+### Encontrarlo
+
+```bash
+cursor-history list --all
+cursor-history search "connection pool"
+cursor-history show 1
+```
+
+Encuentra la conversación en la que ya resolviste el problema, aunque pertenezca a otro espacio de trabajo. Puedes buscar en el historial local compatible creado antes de instalar esta herramienta.
+
+### Conservarlo
+
+```bash
+cursor-history export 1
+cursor-history backup
+cursor-history migrate-session 1 /path/to/new/workspace --dry-run
+```
+
+Exporta las sesiones legibles a Markdown o JSON. Respalda el historial de Composer y previsualiza la migración de las sesiones de Composer compatibles antes de moverlas.
+
+### Reutilizarlo
+
+Usa directamente la [biblioteca de Node.js](#api-de-biblioteca), o conecta el servidor independiente [cursor-history-mcp](https://github.com/S2thend/cursor-history-mcp) para que un asistente compatible con MCP pueda buscar en tu historial de desarrollo.
+
+Puede que ya tengas meses de decisiones, correcciones, prompts y actividad de herramientas en disco. Haz que ese contexto sea más fácil de encontrar la próxima vez que lo necesites.
 
 ## Características
 
 - **Interfaz dual** - Úsalo como herramienta CLI o impórtalo como biblioteca en tus proyectos Node.js
 - **Listar sesiones** - Ver todas las sesiones de chat en todos los espacios de trabajo
-- **Conversaciones completas** - Ver el historial completo de chat con:
+- **Consultar conversaciones** - Examinar el contenido disponible en cada fuente, incluyendo:
   - Respuestas de IA con explicaciones en lenguaje natural
   - **Visualización completa de diff** para ediciones de archivos con resaltado de sintaxis
   - **Llamadas de herramientas detalladas** mostrando todos los parámetros (rutas de archivos, patrones de búsqueda, comandos, etc.)
   - Razonamiento y pensamiento de la IA
   - Marcas de tiempo con procedencia explícita (almacenada o inferida)
-- **Búsqueda** - Encontrar conversaciones por palabra clave con coincidencias resaltadas
+- **Búsqueda** - Buscar por palabra clave en el contenido de conversaciones de varios espacios de trabajo, con coincidencias resaltadas
 - **Exportar** - Guardar sesiones como archivos Markdown o JSON
-- **Migrar** - Mover o copiar sesiones entre espacios de trabajo (ej. al renombrar proyectos)
-- **Respaldo y restauración** - Crear respaldos completos de todo el historial y restaurar cuando sea necesario
+- **Migrar** - Mover o copiar sesiones de Composer compatibles entre espacios de trabajo (ej. al renombrar proyectos)
+- **Respaldo y restauración** - Respaldar las bases de Composer y restaurarlas cuando sea necesario
 - **Multiplataforma** - Funciona en macOS, Windows y Linux
 
 ## Instalación
@@ -91,7 +146,7 @@ cursor-history list
 ## Requisitos
 
 - Node.js 20.x o 22.x–26.x (Node 21 no es compatible; se recomienda Node.js 22.5+ para SQLite integrado)
-- Cursor IDE (con historial de chat existente)
+- Historial local existente de Cursor IDE o Agent CLI en un formato compatible
 
 ## Configuración del controlador SQLite
 
@@ -186,8 +241,8 @@ cursor-history show 1 --short
 # Mostrar texto completo de pensamiento/razonamiento de IA
 cursor-history show 1 --think
 
-# Mostrar contenido completo de lectura de archivos (sin truncar)
-cursor-history show 1 --fullread
+# Mostrar los detalles completos de las llamadas de herramientas (comandos, contenido, resultados)
+cursor-history show 1 --tool
 
 # Mostrar mensajes de error completos (sin truncar a 300 caracteres)
 cursor-history show 1 --error
@@ -198,7 +253,7 @@ cursor-history show 1 --only user,assistant
 cursor-history show 1 --only tool,error
 
 # Combinar opciones
-cursor-history show 1 --short --think --fullread --error
+cursor-history show 1 --short --think --tool --error
 cursor-history show 1 --only user,assistant --short
 
 # Salida como JSON
@@ -239,6 +294,8 @@ cursor-history export 1 --force
 
 ### Migrar sesiones
 
+La migración admite las sesiones de Composer que cumplan los requisitos. Se rechazan las sesiones Store-only, de fuentes combinadas o ambiguas; usa `--dry-run` para previsualizar una migración.
+
 ```bash
 # Mover una sesión a otro espacio de trabajo
 cursor-history migrate-session 1 /ruta/a/nuevo/proyecto
@@ -264,8 +321,10 @@ cursor-history migrate --force /proyecto/antiguo /proyecto/existente
 
 ### Respaldo y restauración
 
+Los archivos de respaldo contienen datos de Composer `state.vscdb`. No incluyen bases de Store, transcripciones de Agent ni almacenes de sesiones ACP. Exporta las sesiones legibles de esas fuentes a Markdown o JSON si necesitas una copia portable; esas exportaciones no son respaldos restaurables.
+
 ```bash
-# Crear respaldo de todo el historial
+# Crear respaldo del historial de Composer
 cursor-history backup
 
 # Crear respaldo en archivo específico
@@ -319,7 +378,7 @@ Al navegar tu historial de chat, verás:
 - **Sesiones resueltas entre pilas** - Cuando el mismo UUID existe en Composer y Store, cursor-history conserva las identidades Composer compatibles y resuelve una vista con procedencia explícita. El alcance del espacio de trabajo se aplica antes de leer contenido: una fuente conocida fuera del límite no se abre y hace que la vista sea parcial; las fuentes permitidas siguen la política canónica de backbone y enriquecimiento, no una unión ciega campo a campo.
 - **Acciones de herramientas IA** - Vista detallada de lo que hizo Cursor AI:
   - **Ediciones/escrituras de archivos** - Visualización completa de diff con resaltado de sintaxis mostrando exactamente qué cambió
-  - **Lecturas de archivos** - Rutas de archivos y previsualizaciones de contenido (usa `--fullread` para contenido completo)
+  - **Lecturas de archivos** - Rutas de archivos y previsualizaciones de contenido (usa `--tool` para contenido completo)
   - **Operaciones de búsqueda** - Patrones, rutas y consultas de búsqueda usadas
   - **Comandos de terminal** - Texto completo del comando
   - **Listados de directorio** - Rutas exploradas
@@ -335,19 +394,25 @@ Al navegar tu historial de chat, verás:
 - **Vista por defecto** - Mensajes completos con pensamiento truncado (200 car.), lecturas de archivos (100 car.) y errores (300 car.)
 - **Modo `--short`** - Trunca mensajes de usuario y asistente a 300 caracteres para escaneo rápido
 - **Bandera `--think`** - Muestra texto completo de razonamiento/pensamiento IA (sin truncar)
-- **Bandera `--fullread`** - Muestra contenido completo de lectura de archivos en lugar de previsualizaciones
+- **Bandera `--tool`** - Muestra los detalles completos de las llamadas de herramientas: comandos, contenido y resultados
 - **Bandera `--error`** - Muestra mensajes de error completos en lugar de previsualización de 300 caracteres
 - **Bandera `--only <tipos>`** - Filtra mensajes por tipo: `user`, `assistant`, `tool`, `thinking`, `error` (separados por comas)
 
 ## Dónde almacena datos Cursor
 
-| Plataforma | Ruta |
-|------------|------|
-| macOS | `~/Library/Application Support/Cursor/User/` |
-| Windows | `%APPDATA%/Cursor/User/` |
-| Linux | `~/.config/Cursor/User/` |
+| Plataforma | Almacenamiento Composer | Almacenamiento Store |
+|---|---|---|
+| macOS | `~/Library/Application Support/Cursor/User/` | `~/.cursor/` |
+| Windows | `%APPDATA%/Cursor/User/` | `%USERPROFILE%\.cursor\` |
+| Linux / WSL | `~/.config/Cursor/User/` | `~/.cursor/` |
 
-La herramienta encuentra y lee automáticamente tu historial de chat de Cursor desde estas ubicaciones.
+La herramienta descubre y lee ambos almacenes automáticamente. El archivo `store.db` de cada sesión es la fuente principal de mensajes de Store. Una vez disponibles las capacidades del controlador y la infraestructura de lectura mediante instantáneas, la transcripción puede servir de alternativa si falta la base, no contiene mensajes utilizables o presenta corrupción o fallos de lectura de los datos de origen. Los fallos de capacidad del controlador o de infraestructura de instantáneas son fatales y no activan esa alternativa. Una base utilizable sigue siendo la única fuente principal de Store; una transcripción coexistente se conserva únicamente como procedencia sustituida.
+
+Usa `--data-path <path>` o `CURSOR_DATA_PATH` para un directorio de Cursor personalizado, y `CURSOR_STORE_ROOT` para configurar la raíz de Store por separado. Puedes indicar la propia raíz o sus subdirectorios `chats`, `projects` o `acp-sessions`; se normalizan a la misma raíz.
+
+En WSL, los datos de Store del lado de Windows suelen montarse en `/mnt/c/Users/<windows-user>/.cursor`. Ejemplo: `CURSOR_STORE_ROOT=/mnt/c/Users/<windows-user>/.cursor cursor-history list --all`. Usa `~/.cursor` del lado de WSL si las sesiones se crearon con un agente de Cursor ejecutado dentro de esa distribución.
+
+No reutilices `node_modules` nativos instalados en Windows al ejecutar el CLI desde WSL. Instala las dependencias con Node.js para Linux en un directorio de dependencias de WSL separado antes de ejecutar pruebas o compilaciones del lado de Linux. `cursor-history` nunca instala ni elimina dependencias automáticamente.
 
 ## API de biblioteca
 
@@ -474,7 +539,7 @@ const sessions = await listSessions({ backupPath: '~/backup.zip' });
 | `exportAllSessionsToMarkdown(config?)` | Exportar todas las sesiones a Markdown |
 | `migrateSession(config)` | Mover/copiar sesiones a otro espacio de trabajo |
 | `migrateWorkspace(config)` | Mover/copiar todas las sesiones entre espacios de trabajo |
-| `createBackup(config?)` | Crear respaldo completo de todo el historial |
+| `createBackup(config?)` | Respaldar el historial de Composer |
 | `restoreBackup(config)` | Restaurar historial desde respaldo |
 | `validateBackup(path)` | Validar integridad del respaldo |
 | `listBackups(directory?)` | Listar archivos de respaldo disponibles |
@@ -575,6 +640,57 @@ try {
 }
 ```
 
+## Compatibilidad y actualizaciones
+
+> **Contrato de compatibilidad:** el documento canónico en inglés
+> [Compatibility and Data-Integrity Contract](./compatibility.md) define la identidad estable, el
+> alcance y base de los índices, el límite de E/S por espacio de trabajo, la fidelidad/procedencia,
+> los tiempos inferidos, los límites de lectura, los permisos de respaldo y los ejemplos
+> verificados de CLI/biblioteca. En caso de diferencia, ese contrato es la fuente de verdad.
+>
+> Los consumidores incrementales de la biblioteca deben fijar v0.16 hasta poder validar v0.18.0
+> antes de actualizar desde v0.17. El camino sin cambios en el consumidor está garantizado
+> para archivos v0.16 que solo contienen Composer; no garantiza conservar IDs sintéticos Store
+> inestables de v0.17.
+>
+> v0.18.0 corrige directamente las coordenadas públicas de búsqueda de v0.16/v0.17 y añade el
+> índice cero-basado a la exportación JSON como metadato nuevo. El contrato canónico también define
+> el punto de publicación y los errores tipados de permisos o limpieza posteriores a una copia de
+> seguridad ya publicada; las rutas de residuo no verificadas nunca deben borrarse a ciegas.
+> La restauración omite entradas corruptas y rechaza rutas, destinos duplicados o enlaces inseguros
+> antes de escribir; `--force` no desactiva estas comprobaciones de integridad y confinamiento. Tras
+> publicar cualquier archivo, un fallo no intenta una reversión automática: conserva todas las
+> hojas y devuelve `RESTORE_ROLLBACK_INCOMPLETE`; detenga Cursor y recupere desde una copia fiable.
+
+### Compatibilidad de v0.18
+
+- Todos los ID de sesión, incluidos los UUID canónicos, conservan el comportamiento de v0.16:
+  búsqueda, agrupación y asociación distinguen mayúsculas de minúsculas y comparan byte por byte.
+  Reutilice exactamente la grafía devuelta; una variante de mayúsculas es un ID distinto.
+- La migración con `--workspace` solo inspecciona metadatos fuera del ámbito, fija las claves físicas
+  exactas y prepara todo el lote antes de escribir. Un destino ambiguo o no elegible cancela el lote
+  sin cambios.
+- Al combinar Composer y Store, los mensajes Store de la rama activa al principio, en medio y al
+  final aparecen una sola vez; las ramas laterales quedan excluidas y los ID antiguos de Composer no
+  cambian.
+- Los índices de Composer con la misma fecha conservan el orden de descubrimiento de v0.16 mediante
+  `String.localeCompare()` en el mismo entorno compatible.
+- El manifiesto de copia de seguridad conserva `manifest.version: "1.0.0"`; el inventario opcional
+  usa su propio `schemaVersion: 1`. Consulte [compatibility.md](compatibility.md) para el contrato
+  normativo.
+
+## Hoja de ruta
+
+Ampliar el respaldo, la restauración y la migración a las nuevas fuentes que ya se pueden leer. Estas son las líneas previstas; aún no hay una versión ni una fecha de publicación comprometida.
+
+- [ ] **Respaldo y restauración de Store / ACP**: incluir las bases de Store, las transcripciones de Agent y los metadatos asociados en archivos restaurables, conservando las relaciones entre fuentes y validando el ciclo de respaldo y restauración.
+- [ ] **Migración de sesiones Store-only**: mover o copiar estas sesiones entre espacios de trabajo, actualizar las asociaciones y referencias de rutas, y comprobar que Cursor las descubra.
+- [ ] **Migración de sesiones de fuentes combinadas**: mover o copiar sesiones presentes tanto en Composer como en Store, conservando sus identificadores nativos y la coherencia de las fuentes.
+
+Hasta que se implementen, el [respaldo y la restauración](#respaldo-y-restauración) cubren Composer, y la [migración](#migrar-sesiones) admite las sesiones de Composer que cumplan los requisitos. Las sesiones legibles de Store / ACP se pueden exportar a Markdown o JSON, pero esos archivos no son respaldos restaurables.
+
+Comparte casos de uso y ejemplos de almacenamiento reproducibles mediante [GitHub Issues](https://github.com/S2thend/cursor-history/issues) para ayudar a priorizar este trabajo.
+
 ## Desarrollo
 
 ### Compilar desde fuente
@@ -621,23 +737,6 @@ Para cada versión:
 Cualquier fallo de código, runtime, artefacto o verificación privada bloquea la publicación. Nunca
 fuerces silenciosamente el movimiento de una etiqueta: corrige explícitamente un candidato aún no
 publicado y usa una versión nueva si ya se publicó cualquier byte.
-
-## Compatibilidad de v0.18
-
-- Todos los ID de sesión, incluidos los UUID canónicos, conservan el comportamiento de v0.16:
-  búsqueda, agrupación y asociación distinguen mayúsculas de minúsculas y comparan byte por byte.
-  Reutilice exactamente la grafía devuelta; una variante de mayúsculas es un ID distinto.
-- La migración con `--workspace` solo inspecciona metadatos fuera del ámbito, fija las claves físicas
-  exactas y prepara todo el lote antes de escribir. Un destino ambiguo o no elegible cancela el lote
-  sin cambios.
-- Al combinar Composer y Store, los mensajes Store de la rama activa al principio, en medio y al
-  final aparecen una sola vez; las ramas laterales quedan excluidas y los ID antiguos de Composer no
-  cambian.
-- Los índices de Composer con la misma fecha conservan el orden de descubrimiento de v0.16 mediante
-  `String.localeCompare()` en el mismo entorno compatible.
-- El manifiesto de copia de seguridad conserva `manifest.version: "1.0.0"`; el inventario opcional
-  usa su propio `schemaVersion: 1`. Consulte [compatibility.md](compatibility.md) para el contrato
-  normativo.
 
 ## Contribuir
 
