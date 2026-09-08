@@ -20,6 +20,8 @@ Cursor 对话可能分散在不同工作区、IDE 数据库、Agent transcript�
 
 **已经积累了几个月的 Cursor 历史？无需提前采集，也无需预先建立索引。** 搜索在本地运行，不需要嵌入模型或 API key。
 
+**希望通过 MCP 接入？** 使用 [cursor-history-mcp](https://github.com/S2thend/cursor-history-mcp#quick-start) 将历史能力暴露为 MCP 工具。Agent 也可以直接调用本项目的 CLI 或 Node.js API，按工作流选择合适的接口即可。两个包独立发布，请查看 [MCP 存储兼容范围与发布说明](https://github.com/S2thend/cursor-history-mcp#compatibility)。
+
 ## 快速上手
 
 ```bash

@@ -20,6 +20,8 @@ Recherchez dans le contenu des conversations de plusieurs espaces de travail, co
 
 **Vous avez déjà des mois d'historique Cursor ? Aucune capture préalable ni configuration d'index n'est nécessaire.** La recherche s'exécute localement, sans embeddings ni clé API.
 
+**Vous préférez une interface serveur MCP ?** Connectez [cursor-history-mcp](https://github.com/S2thend/cursor-history-mcp#quick-start) pour exposer l'historique sous forme d'outils MCP. Les agents peuvent aussi appeler directement le CLI ou l'API Node.js de ce projet : choisissez l'interface adaptée à votre workflow. Les paquets sont publiés indépendamment ; vérifiez la [compatibilité et les informations de publication MCP](https://github.com/S2thend/cursor-history-mcp#compatibility).
+
 ## Démarrage rapide
 
 ```bash

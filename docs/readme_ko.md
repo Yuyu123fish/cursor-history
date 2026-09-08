@@ -21,6 +21,8 @@ Cursor 대화는 워크스페이스, IDE 데이터베이스, Agent 트랜스크�
 **이미 몇 달 치 Cursor 기록이 있나요? 사전 수집이나 인덱스 설정은 필요하지 않습니다.** 검색은 로컬에서 실행되며 임베딩이나 API 키가 필요 없습니다.
 
 <a id="quick-start"></a>
+**MCP 서버 인터페이스를 선호하시나요?** [cursor-history-mcp](https://github.com/S2thend/cursor-history-mcp#quick-start)를 연결하면 기록 기능을 MCP 도구로 제공할 수 있습니다. 에이전트는 이 프로젝트의 CLI나 Node.js API를 직접 호출할 수도 있습니다. 워크플로에 맞는 인터페이스를 선택하세요. 패키지는 별도로 출시되므로 [MCP 저장소 호환성과 릴리스 안내](https://github.com/S2thend/cursor-history-mcp#compatibility)를 확인하세요.
+
 ## 빠른 시작
 
 ```bash

@@ -20,6 +20,8 @@ Search conversation content across workspaces, inspect messages and available to
 
 **Already have months of Cursor history? No prior capture or indexing setup is required.** Search runs locally, with no embeddings or API key.
 
+**Prefer an MCP server interface?** Connect [cursor-history-mcp](https://github.com/S2thend/cursor-history-mcp#quick-start) to expose history as MCP tools. Agents can also call this project's CLI or Node.js API directly—choose the interface that fits your workflow. The packages release independently; check [MCP storage compatibility and release information](https://github.com/S2thend/cursor-history-mcp#compatibility).
+
 ## Quick Start
 
 ```bash

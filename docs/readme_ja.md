@@ -21,6 +21,8 @@ Cursor の会話は、ワークスペース、IDE のデータベース、Agent 
 **すでに数か月分の Cursor 履歴がありますか？事前の収集やインデックスの設定は不要です。** 検索はローカルで実行され、埋め込みモデルや API キーも必要ありません。
 
 <a id="quick-start"></a>
+**MCP サーバー経由で接続したいですか？** [cursor-history-mcp](https://github.com/S2thend/cursor-history-mcp#quick-start) を使うと、履歴機能を MCP ツールとして公開できます。エージェントは本プロジェクトの CLI や Node.js API を直接呼び出すこともできます。ワークフローに合うインターフェースを選んでください。パッケージは個別にリリースされるため、[MCP のストレージ互換性とリリース情報](https://github.com/S2thend/cursor-history-mcp#compatibility)を確認してください。
+
 ## クイックスタート
 
 ```bash
