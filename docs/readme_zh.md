@@ -38,7 +38,28 @@ cursor-history backup
 
 `show` 和 `export` 中的数字对应同一数据源、同一工作区作用域下的会话列表；保存命令供以后使用时，请使用会话 UUID。`backup` 归档的是 Composer 数据库，不包含 Store 数据库或 transcript。
 
-[安装](#安装) · [使用方法](#使用方法) · [输出示例](../README.md#example-output) · [库 API](#库-api) · [路线图](#路线图) · [兼容性与安全升级](#兼容性与安全升级)
+[工具对比](#comparison) · [安装](#安装) · [使用方法](#使用方法) · [输出示例](../README.md#example-output) · [库 API](#库-api) · [路线图](#路线图) · [兼容性与安全升级](#兼容性与安全升级)
+
+<a id="comparison"></a>
+
+## 为什么选择 cursor-history？
+
+如果你希望通过同一套 CLI 和 Node.js API 查找、查看、保存和复用 Cursor 历史，`cursor-history` 提供了完整的使用流程。
+
+- **多种 Cursor 来源，一个接口** — 读取受支持的 Composer、Agent transcript、Store / CLI 和 ACP 数据。
+- **从搜索到保存** — 跨工作区搜索会话正文，查看可用的 diff 和工具活动，导出 Markdown 或 JSON；备份恢复 Composer 数据，并用 `--dry-run` 预览符合条件的 Composer 会话迁移。
+- **融入现有工作流** — 在自己的工具中使用 Node.js API，连接独立的 [MCP 配套项目](https://github.com/S2thend/cursor-history-mcp#compatibility)，或按 [WSL 配置](#cursor-数据存储位置)读取 Windows 侧或 WSL 内的 Store 数据。
+
+| 维度 | **cursor-history（本项目）** | [deja-vu](https://github.com/vshulcz/deja-vu) | [cursaves](https://github.com/Callum-Ward/cursaves) | [johnlindquist/cursor-history](https://github.com/johnlindquist/cursor-history) |
+|---|---|---|---|---|
+| 定位 | Cursor 历史查询与管理；CLI + Node.js API | 跨 Agent 记忆 | Git / S3 同步 | 浏览、导出、剪贴板 |
+| 文档列出的 Cursor 来源 | Composer、Agent transcripts、Store / CLI、ACP | IDE SQLite、CLI transcripts¹ | 工作区及全局 SQLite | 文档未说明 |
+| 搜索 | 跨工作区搜索会话正文 | 跨 Agent 索引搜索 | 文档未说明 | 标题模糊搜索 |
+| 保存与转移历史 | Composer 备份恢复；符合条件的 Composer 迁移 | 记忆同步与交接 | 快照恢复；工作区复制 | 文档未说明 |
+
+文档核对日期：**2026-09-09**。依据为表头链接中的项目 README 及 ¹ [deja-vu 的 Cursor 格式说明](https://github.com/vshulcz/deja-vu/blob/main/docs/registry/cursor.md)，未进行各工具的运行对比测试。“文档未说明”表示所查来源未描述该能力，不代表确认不支持。
+
+本项目的备份与恢复仅覆盖 Composer 数据库；迁移仅支持符合条件的 Composer 会话，不包括 Store-only 或合并来源会话。可读取的 Store / ACP 会话和 transcript 可导出，但导出文件不是可恢复的备份归档。详见[兼容性约定](./compatibility.md)。
 
 ## 为什么需要这个工具
 

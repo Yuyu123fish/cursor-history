@@ -38,7 +38,28 @@ Requires Node.js 20.x or 22.x–26.x and existing local Cursor history. To try w
 
 The numbers in `show` and `export` refer to the list from the same data source and workspace scope; use the session UUID for saved commands. The `backup` command archives Composer databases, not Store databases or transcripts.
 
-[Installation](#installation) · [Usage](#usage) · [Example output](#example-output) · [Library API](#library-api) · [Roadmap](#roadmap) · [Compatibility and safe upgrades](#compatibility-and-safe-upgrades)
+[Comparison](#comparison) · [Installation](#installation) · [Usage](#usage) · [Example output](#example-output) · [Library API](#library-api) · [Roadmap](#roadmap) · [Compatibility and safe upgrades](#compatibility-and-safe-upgrades)
+
+<a id="comparison"></a>
+
+## Why choose cursor-history?
+
+Choose `cursor-history` when you want to find, inspect, preserve, and reuse Cursor history through one CLI and Node.js API.
+
+- **Multiple Cursor sources, one interface** — Read supported Composer, Agent transcript, Store / CLI, and ACP sources.
+- **From search to preservation** — Search conversation content across workspaces, inspect available diffs and tool activity, and export Markdown or JSON. Back up and restore Composer data, or preview eligible Composer migrations with `--dry-run`.
+- **Ready for your workflow** — Use the Node.js API in your own tools, connect the separate [MCP companion](https://github.com/S2thend/cursor-history-mcp#compatibility), or follow the [WSL configuration](#where-cursor-stores-data) to read Windows-side or WSL-local Store data.
+
+| Dimension | **cursor-history (this project)** | [deja-vu](https://github.com/vshulcz/deja-vu) | [cursaves](https://github.com/Callum-Ward/cursaves) | [johnlindquist/cursor-history](https://github.com/johnlindquist/cursor-history) |
+|---|---|---|---|---|
+| Focus | Cursor history access and management; CLI + Node.js API | Cross-agent memory | Git / S3 sync | Browsing, export, clipboard |
+| Documented Cursor sources | Composer, Agent transcripts, Store / CLI, ACP | IDE SQLite, CLI transcripts¹ | Workspace/global SQLite | Not documented |
+| Search | Conversation content across workspaces | Cross-agent indexed search | Not documented | Fuzzy title search |
+| Preservation and moving history | Composer backup/restore; eligible Composer migration | Memory sync/handoff | Snapshot restore; workspace copy | Not documented |
+
+Documentation comparison checked **2026-09-09**, using the linked project READMEs and ¹ [deja-vu's Cursor format registry](https://github.com/vshulcz/deja-vu/blob/main/docs/registry/cursor.md); not a comparative runtime test. “Not documented” means the reviewed sources do not describe the capability, not that it is unsupported.
+
+Our backup and restore cover Composer databases only. Migration supports eligible Composer sessions; Store-only and merged-source sessions are excluded. Store / ACP sessions and transcripts can be exported when readable, but those exports are not restorable backup archives. See the [compatibility contract](./docs/compatibility.md).
 
 ## Why this exists
 

@@ -38,7 +38,28 @@ Requiere Node.js 20.x o 22.x–26.x y un historial local de Cursor existente. Pa
 
 Los números de `show` y `export` corresponden a la lista de la misma fuente de datos y el mismo ámbito de espacio de trabajo; usa el UUID de la sesión en los comandos que guardes. `backup` archiva las bases de Composer, no las de Store ni las transcripciones.
 
-[Instalación](#instalación) · [Uso](#uso) · [Ejemplos de salida](../README.md#example-output) · [API de biblioteca](#api-de-biblioteca) · [Hoja de ruta](#hoja-de-ruta) · [Compatibilidad](#compatibilidad-y-actualizaciones)
+[Comparación](#comparison) · [Instalación](#instalación) · [Uso](#uso) · [Ejemplos de salida](../README.md#example-output) · [API de biblioteca](#api-de-biblioteca) · [Hoja de ruta](#hoja-de-ruta) · [Compatibilidad](#compatibilidad-y-actualizaciones)
+
+<a id="comparison"></a>
+
+## ¿Por qué elegir cursor-history?
+
+Elige `cursor-history` para buscar, consultar, conservar y reutilizar el historial de Cursor mediante un mismo CLI y una API de Node.js.
+
+- **Varias fuentes de Cursor, una interfaz** — Lee las fuentes compatibles: Composer, transcripciones de Agent, Store / CLI y ACP.
+- **De la búsqueda a la conservación** — Busca en el texto de conversaciones de varios espacios de trabajo, consulta los diff y la actividad de herramientas disponibles y exporta a Markdown o JSON. Respalda y restaura datos de Composer, o previsualiza migraciones de Composer admitidas con `--dry-run`.
+- **Se adapta a tu flujo de trabajo** — Usa la API de Node.js en tus herramientas, conecta el [proyecto MCP independiente](https://github.com/S2thend/cursor-history-mcp#compatibility) o sigue la [configuración de WSL](#dónde-almacena-datos-cursor) para leer datos de Store en Windows o dentro de WSL.
+
+| Aspecto | **cursor-history (este proyecto)** | [deja-vu](https://github.com/vshulcz/deja-vu) | [cursaves](https://github.com/Callum-Ward/cursaves) | [johnlindquist/cursor-history](https://github.com/johnlindquist/cursor-history) |
+|---|---|---|---|---|
+| Enfoque | Consulta y gestión de Cursor; CLI + API Node.js | Memoria entre agentes | Sincronización Git / S3 | Navegación, exportación, portapapeles |
+| Fuentes de Cursor documentadas | Composer, transcripciones Agent, Store / CLI, ACP | SQLite IDE, transcripciones CLI¹ | SQLite de espacios de trabajo/global | Sin documentar |
+| Búsqueda | Texto de conversaciones entre espacios de trabajo | Índice entre agentes | Sin documentar | Títulos, búsqueda aproximada |
+| Conservación y traslado | Respaldo/restauración de Composer; migración de Composer admitida | Sincronización/traspaso de memoria | Restauración; copia entre espacios | Sin documentar |
+
+Comparación documental revisada el **2026-09-09**, basada en los README enlazados y el ¹ [registro de Cursor de deja-vu](https://github.com/vshulcz/deja-vu/blob/main/docs/registry/cursor.md); sin pruebas comparativas de ejecución. «Sin documentar» indica que las fuentes consultadas no describen esa capacidad, no que no exista.
+
+Nuestro respaldo y restauración cubren únicamente las bases de Composer. La migración admite sesiones de Composer que cumplen los requisitos; excluye sesiones solo de Store o de fuentes fusionadas. Las sesiones de Store / ACP y transcripciones legibles se pueden exportar, pero esos archivos no son respaldos restaurables. Consulta el [contrato de compatibilidad](./compatibility.md).
 
 ## Por qué existe esta herramienta
 

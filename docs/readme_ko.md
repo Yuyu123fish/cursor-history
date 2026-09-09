@@ -39,7 +39,28 @@ Node.js 20.x 또는 22.x–26.x와 기존 로컬 Cursor 기록이 필요합니�
 
 `show`와 `export`의 숫자는 같은 데이터 소스와 워크스페이스 범위에서 얻은 목록을 기준으로 합니다. 저장해 두고 다시 실행할 명령에는 세션 UUID를 사용하세요. `backup`은 Composer 데이터베이스를 보관하며 Store 데이터베이스나 트랜스크립트는 포함하지 않습니다.
 
-[설치](#installation) · [사용법](#usage) · [출력 예시](../README.md#example-output) · [라이브러리 API](#library-api) · [로드맵](#roadmap) · [호환성](#compatibility)
+[도구 비교](#comparison) · [설치](#installation) · [사용법](#usage) · [출력 예시](../README.md#example-output) · [라이브러리 API](#library-api) · [로드맵](#roadmap) · [호환성](#compatibility)
+
+<a id="comparison"></a>
+
+## cursor-history를 선택하는 이유
+
+`cursor-history`는 하나의 CLI와 Node.js API로 Cursor 기록을 찾고, 살펴보고, 보존하고, 재사용하려는 경우에 적합합니다.
+
+- **여러 Cursor 소스를 하나의 인터페이스로** — 지원되는 Composer, Agent 트랜스크립트, Store / CLI, ACP 소스를 읽습니다.
+- **검색부터 보존까지** — 여러 워크스페이스의 대화 본문을 검색하고, 사용 가능한 diff와 도구 활동을 확인하며, Markdown / JSON으로 내보냅니다. Composer 데이터를 백업·복원하고, 조건을 충족하는 Composer 세션의 마이그레이션을 `--dry-run`으로 미리 확인할 수 있습니다.
+- **기존 작업 흐름에 통합** — 직접 만든 도구에서 Node.js API를 사용하거나 별도 [MCP 연동 프로젝트](https://github.com/S2thend/cursor-history-mcp#compatibility)를 연결할 수 있습니다. [WSL 설정](#storage)에 따라 Windows 쪽이나 WSL 내부의 Store 데이터도 읽을 수 있습니다.
+
+| 비교 항목 | **cursor-history(이 프로젝트)** | [deja-vu](https://github.com/vshulcz/deja-vu) | [cursaves](https://github.com/Callum-Ward/cursaves) | [johnlindquist/cursor-history](https://github.com/johnlindquist/cursor-history) |
+|---|---|---|---|---|
+| 주요 용도 | Cursor 기록 조회·관리; CLI + Node.js API | 에이전트 간 기억 공유 | Git / S3 동기화 | 탐색·내보내기·클립보드 |
+| 문서에 명시된 Cursor 소스 | Composer, Agent 트랜스크립트, Store / CLI, ACP | IDE SQLite, CLI 트랜스크립트¹ | 워크스페이스·전역 SQLite | 문서에 명시되지 않음 |
+| 검색 | 여러 워크스페이스의 대화 본문 검색 | 에이전트 간 인덱스 검색 | 문서에 명시되지 않음 | 제목 유사 검색 |
+| 기록 보존·이동 | Composer 백업·복원; 조건을 충족하는 Composer 마이그레이션 | 기억 동기화·인계 | 스냅샷 복원·워크스페이스 간 복사 | 문서에 명시되지 않음 |
+
+문서 확인일: **2026-09-09**. 링크된 README와 ¹ [deja-vu의 Cursor 형식 문서](https://github.com/vshulcz/deja-vu/blob/main/docs/registry/cursor.md)를 기준으로 비교했으며, 각 도구를 실행한 비교 테스트는 아닙니다. “문서에 명시되지 않음”은 확인한 자료에 설명이 없다는 뜻이며, 미지원으로 단정하지 않습니다.
+
+이 프로젝트의 백업·복원은 Composer 데이터베이스만 대상으로 합니다. 마이그레이션은 조건을 충족하는 Composer 세션만 지원하며, Store 전용 세션이나 여러 소스를 병합한 세션은 제외됩니다. 읽을 수 있는 Store / ACP 세션과 트랜스크립트는 내보낼 수 있지만, 내보낸 파일은 복원 가능한 백업이 아닙니다. [호환성 계약](./compatibility.md)을 참고하세요.
 
 ## 이 도구가 필요한 이유
 

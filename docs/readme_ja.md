@@ -39,7 +39,28 @@ Node.js 20.x または 22.x–26.x と、既存のローカル Cursor 履歴が�
 
 `show` と `export` の番号は、同じデータソースとワークスペース範囲で取得した一覧に対応します。保存して再利用するコマンドにはセッション UUID を使ってください。`backup` の対象は Composer データベースであり、Store データベースやトランスクリプトは含みません。
 
-[インストール](#installation) · [使い方](#usage) · [出力例](../README.md#example-output) · [ライブラリ API](#library-api) · [ロードマップ](#roadmap) · [互換性](#compatibility)
+[ツール比較](#comparison) · [インストール](#installation) · [使い方](#usage) · [出力例](../README.md#example-output) · [ライブラリ API](#library-api) · [ロードマップ](#roadmap) · [互換性](#compatibility)
+
+<a id="comparison"></a>
+
+## cursor-history を選ぶ理由
+
+`cursor-history` は、同じ CLI と Node.js API で Cursor 履歴の検索、閲覧、保存、再利用を行いたい場合に適しています。
+
+- **複数の Cursor ソースを一つのインターフェースで** — 対応する Composer、Agent トランスクリプト、Store / CLI、ACP を読み取れます。
+- **検索から保存まで** — ワークスペースを横断して会話本文を検索し、利用可能な差分やツール操作を確認して Markdown / JSON にエクスポートできます。Composer データのバックアップ・復元に加え、対象となる Composer セッションの移行を `--dry-run` で確認できます。
+- **既存のワークフローに統合** — 自作ツールで Node.js API を利用するか、独立した [MCP 連携プロジェクト](https://github.com/S2thend/cursor-history-mcp#compatibility)を接続できます。[WSL の設定](#storage)に従えば、Windows 側または WSL 内の Store データも読み取れます。
+
+| 比較項目 | **cursor-history（本プロジェクト）** | [deja-vu](https://github.com/vshulcz/deja-vu) | [cursaves](https://github.com/Callum-Ward/cursaves) | [johnlindquist/cursor-history](https://github.com/johnlindquist/cursor-history) |
+|---|---|---|---|---|
+| 主な用途 | Cursor 履歴の閲覧・管理、CLI + Node.js API | エージェント間の記憶共有 | Git / S3 同期 | 閲覧・エクスポート・クリップボード |
+| 文書に記載された Cursor ソース | Composer、Agent トランスクリプト、Store / CLI、ACP | IDE SQLite、CLI トランスクリプト¹ | ワークスペース・グローバル SQLite | 記載なし |
+| 検索 | ワークスペースを横断する会話本文検索 | エージェント横断のインデックス検索 | 記載なし | タイトルのあいまい検索 |
+| 履歴の保存・移動 | Composer バックアップ・復元、対象 Composer セッションの移行 | 記憶の同期・引き継ぎ | スナップショット復元・ワークスペース間コピー | 記載なし |
+
+文書の確認日：**2026-09-09**。リンク先の README と ¹ [deja-vu の Cursor 形式説明](https://github.com/vshulcz/deja-vu/blob/main/docs/registry/cursor.md)に基づく比較であり、各ツールの動作比較テストではありません。「記載なし」は確認した文書に説明がないという意味で、非対応を断定するものではありません。
+
+本プロジェクトのバックアップ・復元は Composer データベースのみが対象です。移行は条件を満たす Composer セッションに限り、Store のみのセッションや複数ソースを統合したセッションは対象外です。読み取れる Store / ACP セッションやトランスクリプトはエクスポートできますが、復元可能なバックアップにはなりません。[互換性の契約](./compatibility.md)を参照してください。
 
 ## このツールが必要な理由
 
