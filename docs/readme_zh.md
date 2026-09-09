@@ -114,7 +114,7 @@ cursor-history migrate-session 1 /path/to/new/workspace --dry-run
 - **导出** - 将会话保存为 Markdown 或 JSON 文件
 - **迁移** - 在工作区之间移动或复制受支持的 Composer 会话（例如重命名项目时）
 - **备份与恢复** - 备份 Composer 数据库，并在需要时恢复
-- **跨平台** - 支持 macOS、Windows 和 Linux
+- **跨平台与 WSL 支持** - 支持 macOS、Windows、Linux 和 WSL。在 WSL 中，可配置数据路径，读取存储在 Windows 侧或 WSL 内的 Cursor Store 会话。详见 [WSL 配置](#cursor-数据存储位置)。
 
 ## 安装
 

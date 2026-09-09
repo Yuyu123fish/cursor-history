@@ -109,7 +109,7 @@ cursor-history migrate-session 1 /path/to/new/workspace --dry-run
 - Markdown / JSON へのエクスポートに対応しています。
 - 対応する Composer セッションを移動・コピーできます。
 - Composer データベースのバックアップと復元に対応しています。
-- macOS、Windows、Linux で利用できます。
+- **クロスプラットフォーム・WSL 対応** - macOS、Windows、Linux、WSL で利用できます。WSL ではデータパスを設定することで、Windows 側または WSL 内に保存された Cursor Store セッションを読み取れます。[WSL の設定](#storage)を参照してください。
 
 <a id="installation"></a>
 ## インストール

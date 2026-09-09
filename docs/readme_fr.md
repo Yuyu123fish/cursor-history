@@ -114,7 +114,7 @@ Des mois de décisions, de corrections, de prompts et d'activité des outils peu
 - **Export** - Sauvegarder les sessions en fichiers Markdown ou JSON
 - **Migration** - Déplacer ou copier les sessions Composer prises en charge entre espaces de travail (ex. lors du renommage de projets)
 - **Sauvegarde et restauration** - Sauvegarder les bases Composer et les restaurer si nécessaire
-- **Multi-plateforme** - Fonctionne sur macOS, Windows et Linux
+- **Multi-plateforme et prise en charge de WSL** - Fonctionne sur macOS, Windows, Linux et WSL. Depuis WSL, configurez le chemin des données pour lire les sessions Cursor Store stockées sous Windows ou dans WSL. Consultez la [configuration de WSL](#où-cursor-stocke-les-données).
 
 ## Installation
 

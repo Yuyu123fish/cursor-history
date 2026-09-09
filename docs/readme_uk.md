@@ -109,7 +109,7 @@ cursor-history migrate-session 1 /path/to/new/workspace --dry-run
 - Експорт у Markdown / JSON.
 - Переміщення та копіювання підтримуваних сеансів Composer.
 - Резервне копіювання та відновлення баз Composer.
-- Підтримка macOS, Windows і Linux.
+- **Підтримка різних платформ і WSL** - Працює в macOS, Windows, Linux і WSL. У WSL можна налаштувати шлях до даних, щоб читати сеанси Cursor Store, збережені у Windows або всередині WSL. Див. [налаштування WSL](#storage).
 
 <a id="installation"></a>
 ## Встановлення

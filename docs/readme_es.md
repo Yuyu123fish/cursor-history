@@ -114,7 +114,7 @@ Puede que ya tengas meses de decisiones, correcciones, prompts y actividad de he
 - **Exportar** - Guardar sesiones como archivos Markdown o JSON
 - **Migrar** - Mover o copiar sesiones de Composer compatibles entre espacios de trabajo (ej. al renombrar proyectos)
 - **Respaldo y restauración** - Respaldar las bases de Composer y restaurarlas cuando sea necesario
-- **Multiplataforma** - Funciona en macOS, Windows y Linux
+- **Multiplataforma y soporte para WSL** - Funciona en macOS, Windows, Linux y WSL. Desde WSL, configura la ruta de datos para leer sesiones de Cursor Store almacenadas en Windows o dentro de WSL. Consulta la [configuración de WSL](#dónde-almacena-datos-cursor).
 
 ## Instalación
 

@@ -109,7 +109,7 @@ cursor-history migrate-session 1 /path/to/new/workspace --dry-run
 - Markdown / JSON 내보내기를 지원합니다.
 - 지원되는 Composer 세션을 이동·복사합니다.
 - Composer 데이터베이스를 백업·복원합니다.
-- macOS, Windows, Linux에서 사용할 수 있습니다.
+- **크로스 플랫폼 및 WSL 지원** - macOS, Windows, Linux, WSL에서 사용할 수 있습니다. WSL에서 데이터 경로를 설정하면 Windows 쪽이나 WSL 내부에 저장된 Cursor Store 세션을 읽을 수 있습니다. [WSL 설정](#storage)을 참고하세요.
 
 <a id="installation"></a>
 ## 설치

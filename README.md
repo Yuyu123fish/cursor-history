@@ -114,7 +114,7 @@ Months of decisions, fixes, prompts, and tool activity may already be on disk. M
 - **Export** - Save sessions as Markdown or JSON files
 - **Migrate** - Move or copy supported Composer sessions between workspaces (e.g., when renaming projects)
 - **Backup & Restore** - Back up Composer databases and restore them when needed
-- **Cross-platform** - Works on macOS, Windows, and Linux
+- **Cross-platform & WSL support** - Works on macOS, Windows, Linux, and WSL. From WSL, configure the data path to read Cursor Store sessions stored on Windows or inside WSL. See [WSL configuration](#where-cursor-stores-data).
 
 ## Installation
 
